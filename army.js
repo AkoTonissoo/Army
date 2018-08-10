@@ -1,6 +1,6 @@
 /**
  * Read data from command line
- * order of data: 1. No of tents, 2. No of soldiers per tent, 3. No of drivers per tent, 4. Duration in hours
+ * order of data: 1. No of tents, 2. No of soldiers per tent, 3. No of drivers per tent, 4. number of sick people, 5.Duration in hours
  */
 data = []
 process.argv.forEach(function (val, index, array) {
@@ -20,6 +20,7 @@ const createTents = (data) => {
     let nrOfTents = data[2];
     let nrOfSoldiers = data[3];
     let nrOfDrivers = data[4];
+    let nrOfIll = data[5];
 
     for (var i=0; i<nrOfTents; i++){
         tentArray.push([]);
@@ -27,19 +28,23 @@ const createTents = (data) => {
 
             //if there are more drivers needed
             if (a < nrOfDrivers){
-                tentArray[i].push({name: 'Soldier'+a+'_'+i, driver: 1, hours: 0, lastShift: 0});
+                tentArray[i].push({name: 'Soldier'+a+'_'+i, driver: 1, hours: 0, lastShift: 0, ill: 0});
+            }
+            if (a > nrOfDrivers && a < nrOfIll+nrOfDrivers) {
+                tentArray[i].push({name: 'Soldier'+a+'_'+i, driver: 0, hours: 0, lastShift: 0, ill: 1});
             }
             else {
-                tentArray[i].push({name: 'Soldier'+a+'_'+i, driver: 0, hours: 0, lastShift: 0});
+                tentArray[i].push({name: 'Soldier'+a+'_'+i, driver: 0, hours: 0, lastShift: 0, ill: 0});
             }           
         }
     }
+    console.log(tentArray);
     return tentArray;
 };
 
 //generating testdata
 const tents = createTents(data);
-const testSpan = {hours: data[5]};
+const testSpan = {hours: data[6]};
 
 /**
  * creates an empty schedule
@@ -110,18 +115,22 @@ const findPatrolHours = (hours, nrOfTents, nr) => {
  * in the end top 2 of the array sorted by hours is returned
  */
 
-const findBestAvailableSoldiers = (soldiers, time, drivers) => {
+const findBestAvailableSoldiers = (soldiers, time, drivers, ill) => {
     let available2 = [];
     let available = [];
 
     for (var i=0;i<soldiers.length;i++){
-
+        
         if (drivers){
             available = withoutDrivers(i, soldiers, available2);
         }
         else {
             available = withoutDrivers(i, soldiers, available2);
         }
+        if (ill) {
+            available = withoutIll(i, soldiers, available2);
+        }
+        
               
     }
 
@@ -153,6 +162,13 @@ const withoutDrivers = (i, soldiers, available) => {
     return available;
 };
 
+const withoutIll = (i, soldiers, available) => {
+    if (soldiers[i].ill != 1) {
+        available.push(soldiers[i]);
+    };
+    return available;
+};
+
 const assignHours = (patrolHours, hours, tent, schedule, nr) => {
     let start = 0;
     let stop = hours;
@@ -169,7 +185,7 @@ const assignHours = (patrolHours, hours, tent, schedule, nr) => {
         let condition = (hours-i > 6 || i >= 6);
         let soldiers = findBestAvailableSoldiers(tent, i, condition);
 
-        if (stoveTrue) {
+        if (stoveTrue) {//todo check et keegi ees poleks seal juba
             let soldier1inPatrol = schedule[nr].hours[i].soldiers.patrol1.name;
             let soldier2inPatrol = schedule[nr].hours[i].soldiers.patrol2.name;
 
@@ -195,6 +211,8 @@ const assignHours = (patrolHours, hours, tent, schedule, nr) => {
             
         }
         else {
+
+            if (soldiers[0])
 
             tent[tent.indexOf(soldiers[0])].hours++;
             tent[tent.indexOf(soldiers[1])].hours++;
