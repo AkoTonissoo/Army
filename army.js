@@ -99,6 +99,13 @@ const findPatrolHours = (hours, nrOfTents, nr) => {
     return hoursArray;
 };
 
+/**
+ * finds soldiers who have had to guard the least
+ * if the hours are fitting for the drivers, withDrivers() helper function finds
+ * if the driver has gotten enough sleep and adds to the array
+ * in the end top 2 of the array sorted by hours is returned
+ */
+
 const findBestAvailableSoldiers = (soldiers, time, drivers) => {
     let available = [];
 
