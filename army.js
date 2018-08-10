@@ -179,3 +179,31 @@ const assignHours = (patrolHours, hours, tent, schedule, nr) => {
         };
     };
 };
+
+/**
+ * assigns schedule for one tent
+ */
+
+const singleTentScheduleMaker = (span, tent, nrOfTents, nr, schedule) => {
+
+    let totalHours = span.hours;
+    let shiftLength = findShiftLength(span, tent, nrOfTents);
+    let patrolHours = findPatrolHours(span.hours, nrOfTents, nr);
+
+
+    assignHours(patrolHours[nr], span.hours, tent, schedule, nr);
+    assignHours(null, span.hours, tent, schedule, nr);
+
+};
+
+/**
+ * iterates tent array and creates full schedule
+ */
+
+const totalScheduleMaker = (tents, span) => {
+    schedule = createEmptySchedule(span.hours, tents.length);
+    for (var i=0;i<tents.length;i++){
+        singleTentScheduleMaker(span, tents[i], tents.length, i, schedule);
+    };
+
+};
