@@ -125,11 +125,16 @@ const findBestAvailableSoldiers = (soldiers, time, drivers, ill) => {
             available = withoutDrivers(i, soldiers, available2);
         }
         else {
-            available = withoutDrivers(i, soldiers, available2);
+            if (ill) {
+                available = withoutIll(i, soldiers, available2);
+                //console.log(available);
+            }
+            else {
+                available = withoutDrivers(i, soldiers, available2);
+            }
+           
         }
-        if (ill) {
-            available = withoutIll(i, soldiers, available2);
-        }
+        
         
               
     }
@@ -145,7 +150,7 @@ const findBestAvailableSoldiers = (soldiers, time, drivers, ill) => {
 
 const withDrivers = (i, soldiers, available) => {
     if (soldiers[i].driver == 1) {
-        if (soldiers[i].driver.lastSlept >= 6) {
+        if (soldiers[i].lastShift >= 6) {
             available.push(soldiers[i]);
         } 
     }
@@ -163,9 +168,12 @@ const withoutDrivers = (i, soldiers, available) => {
 };
 
 const withoutIll = (i, soldiers, available) => {
-    if (soldiers[i].ill != 1) {
+    //console.log(available);
+    if (soldiers[i].ill == 0) {
         available.push(soldiers[i]);
+        //console.log(soldiers[i].ill);
     };
+    //console.log(available);
     return available;
 };
 
@@ -183,7 +191,7 @@ const assignHours = (patrolHours, hours, tent, schedule, nr) => {
 
     for (var i=start; i<stop; i++){
         let condition = (hours-i > 6 || i >= 6);
-        let soldiers = findBestAvailableSoldiers(tent, i, condition);
+        let soldiers = findBestAvailableSoldiers(tent, i, condition, false);
 
         if (stoveTrue) {//todo check et keegi ees poleks seal juba
             let soldier1inPatrol = schedule[nr].hours[i].soldiers.patrol1.name;
@@ -197,10 +205,12 @@ const assignHours = (patrolHours, hours, tent, schedule, nr) => {
             if (option1 == soldier1inPatrol || option1 == soldier2inPatrol){
                 if (option2 == soldier1inPatrol || option2 == soldier2inPatrol) {
                     tent[tent.indexOf(soldiers[2])].hours++;
+                    tent[tent.indexOf(soldiers[1])].lastShift = i;
                     schedule[nr].hours[i].soldiers.stove = soldiers[2];
                 }
                 else {
                     tent[tent.indexOf(soldiers[1])].hours++;
+                    tent[tent.indexOf(soldiers[1])].lastShift = i;
                     schedule[nr].hours[i].soldiers.stove = soldiers[1];
                 }
             }
@@ -212,13 +222,27 @@ const assignHours = (patrolHours, hours, tent, schedule, nr) => {
         }
         else {
 
-            if (soldiers[0])
+            if (soldiers[0].ill == 1){
+                soldiers = findBestAvailableSoldiers(tent, i, false, true);
+            }
+            if (soldiers[1].ill == 1){
+                soldiers = findBestAvailableSoldiers(tent, i, false, true);
+            }
 
-            tent[tent.indexOf(soldiers[0])].hours++;
-            tent[tent.indexOf(soldiers[1])].hours++;
-    
-            schedule[nr].hours[i].soldiers.patrol1 = soldiers[0];
-            schedule[nr].hours[i].soldiers.patrol2 = soldiers[1];
+            if (soldiers[0] == soldiers[1]) {
+                tent[tent.indexOf(soldiers[0])].hours++;
+                tent[tent.indexOf(soldiers[2])].hours++;
+                schedule[nr].hours[i].soldiers.patrol1 = soldiers[0];
+                schedule[nr].hours[i].soldiers.patrol2 = soldiers[2];
+            }
+            else {
+                tent[tent.indexOf(soldiers[0])].hours++;
+                tent[tent.indexOf(soldiers[2])].hours++;
+                //console.log(soldiers[0]);
+                schedule[nr].hours[i].soldiers.patrol1 = soldiers[0];
+                schedule[nr].hours[i].soldiers.patrol2 = soldiers[1];
+            }
+
         };
     };
 };
