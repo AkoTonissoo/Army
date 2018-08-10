@@ -205,5 +205,34 @@ const totalScheduleMaker = (tents, span) => {
     for (var i=0;i<tents.length;i++){
         singleTentScheduleMaker(span, tents[i], tents.length, i, schedule);
     };
-
+    prettyConsoleUI(schedule);
 };
+
+const prettyConsoleUI = (schedule) => {
+    for(var i = 0; i<schedule.length; i++) {
+        console.log('----------------');
+        console.log('Tent no. '+(schedule[i].tent+1));
+        for (var a=0; a<schedule[i].hours.length; a++){
+            console.log('Hours '+schedule[i].hours[a].hour+' - '+(schedule[i].hours[a].hour+1));
+            let stove = 'Stove: ' + schedule[i].hours[a].soldiers.stove.name + ' - ' + schedule[i].hours[a].soldiers.stove.hours
+            patrol1 = ''
+            let patrol2 = ''
+
+            if (schedule[i].hours[a].soldiers.patrol1.name) {
+                patrol1 = 'First patrol: ' + schedule[i].hours[a].soldiers.patrol1.name + ' - ' + schedule[i].hours[a].soldiers.patrol1.hours
+            }
+
+            if (schedule[i].hours[a].soldiers.patrol2.name) {
+                patrol2 = 'Second patrol: ' + schedule[i].hours[a].soldiers.patrol2.name + ' - ' + schedule[i].hours[a].soldiers.patrol2.hours
+                console.log(stove + ' - ' + patrol1 + ' - ' + patrol2);
+            }
+            else {
+                console.log(stove);
+            }
+            
+            
+        }
+    };
+};
+
+totalScheduleMaker(tents, testSpan);
