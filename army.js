@@ -37,6 +37,10 @@ const createTents = (data) => {
     return tentArray;
 };
 
+//generating testdata
+const tents = createTents(data);
+const testSpan = {hours: data[5]};
+
 /**
  * creates an empty schedule
  * is grouped by tents and on every hour there will be empty slots for stovewatch and patrolling
