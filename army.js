@@ -27,10 +27,10 @@ const createTents = (data) => {
 
             //if there are more drivers needed
             if (a < nrOfDrivers){
-                tentArray[i].push({name: 'Soldier'+a, driver: 1, hours: 0, lastShift: 0});
+                tentArray[i].push({name: 'Soldier'+a+'_'+i, driver: 1, hours: 0, lastShift: 0});
             }
             else {
-                tentArray[i].push({name: 'Soldier'+a, driver: 0, hours: 0, lastShift: 0});
+                tentArray[i].push({name: 'Soldier'+a+'_'+i, driver: 0, hours: 0, lastShift: 0});
             }           
         }
     }
@@ -129,8 +129,8 @@ const findBestAvailableSoldiers = (soldiers, time, drivers) => {
         return a.hours - b.hours;
     });
 
-    var sortedTop2 = sorted.slice(0, 2);
-    return sortedTop2;
+    var sortedTop3 = sorted.slice(0, 3);
+    return sortedTop3;
 
 };
 
@@ -166,15 +166,36 @@ const assignHours = (patrolHours, hours, tent, schedule, nr) => {
     }
 
     for (var i=start; i<stop; i++){
-        
         let condition = (hours-i > 6 || i >= 6);
         let soldiers = findBestAvailableSoldiers(tent, i, condition);
 
         if (stoveTrue) {
-            tent[tent.indexOf(soldiers[0])].hours++;
-            schedule[nr].hours[i].soldiers.stove = soldiers[0];
+            let soldier1inPatrol = schedule[nr].hours[i].soldiers.patrol1.name;
+            let soldier2inPatrol = schedule[nr].hours[i].soldiers.patrol2.name;
+
+            // helpers to eliminate duplicate soldiers on stove and patrol
+            let option1 = soldiers[0].name;
+            let option2 = soldiers[1].name;
+            let option3 = soldiers[2].name;
+
+            if (option1 == soldier1inPatrol || option1 == soldier2inPatrol){
+                if (option2 == soldier1inPatrol || option2 == soldier2inPatrol) {
+                    tent[tent.indexOf(soldiers[2])].hours++;
+                    schedule[nr].hours[i].soldiers.stove = soldiers[2];
+                }
+                else {
+                    tent[tent.indexOf(soldiers[1])].hours++;
+                    schedule[nr].hours[i].soldiers.stove = soldiers[1];
+                }
+            }
+            else {
+                tent[tent.indexOf(soldiers[0])].hours++;
+                schedule[nr].hours[i].soldiers.stove = soldiers[0];
+            }
+            
         }
         else {
+
             tent[tent.indexOf(soldiers[0])].hours++;
             tent[tent.indexOf(soldiers[1])].hours++;
     
@@ -218,21 +239,22 @@ const prettyConsoleUI = (schedule) => {
         console.log('Tent no. '+(schedule[i].tent+1));
         for (var a=0; a<schedule[i].hours.length; a++){
             console.log('Hours '+schedule[i].hours[a].hour+' - '+(schedule[i].hours[a].hour+1));
-            let stove = 'Stove: ' + schedule[i].hours[a].soldiers.stove.name + ' - ' + schedule[i].hours[a].soldiers.stove.hours
+            let stove = 'Stove: ' + schedule[i].hours[a].soldiers.stove.name// + ' - ' + schedule[i].hours[a].soldiers.stove.hours
             patrol1 = ''
             let patrol2 = ''
 
             if (schedule[i].hours[a].soldiers.patrol1.name) {
-                patrol1 = 'First patrol: ' + schedule[i].hours[a].soldiers.patrol1.name + ' - ' + schedule[i].hours[a].soldiers.patrol1.hours
+                patrol1 = 'First patrol: ' + schedule[i].hours[a].soldiers.patrol1.name// + ' - ' + schedule[i].hours[a].soldiers.patrol1.hours
             }
 
             if (schedule[i].hours[a].soldiers.patrol2.name) {
-                patrol2 = 'Second patrol: ' + schedule[i].hours[a].soldiers.patrol2.name + ' - ' + schedule[i].hours[a].soldiers.patrol2.hours
+                patrol2 = 'Second patrol: ' + schedule[i].hours[a].soldiers.patrol2.name// + ' - ' + schedule[i].hours[a].soldiers.patrol2.hours
                 console.log(stove + ' - ' + patrol1 + ' - ' + patrol2);
             }
             else {
                 console.log(stove);
             }
+            console.log('\n');
             
             
         }
