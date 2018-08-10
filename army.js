@@ -98,3 +98,42 @@ const findPatrolHours = (hours, nrOfTents, nr) => {
     }
     return hoursArray;
 };
+
+const findBestAvailableSoldiers = (soldiers, time, drivers) => {
+    let available = [];
+
+    for (var i=0;i<soldiers.length;i++){
+
+        if (drivers){
+            available = withDrivers(i, soldiers, available);
+        }
+        else {
+            available = withoutDrivers(i, soldiers, available);
+        }        
+    }
+
+    let sorted = available.sort(function (a, b) {
+        return a.hours - b.hours;
+    });
+
+    var sortedTop2 = sorted.slice(0, 2);
+    return sortedTop2;
+
+};
+
+const withDrivers = (i, soldiers, available) => {
+    if (soldiers[i].driver == 1) {
+        if (soldiers[i].driver.lastSlept >= 6) {
+            available.push(soldiers[i]);
+        } 
+    }
+    else {
+        available.push(soldiers[i]);
+    };
+};
+
+const withoutDrivers = (i, soldiers, available) => {
+    if (soldiers[i].driver != 1) {
+        available.push(soldiers[i]);
+    };
+};
