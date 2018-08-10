@@ -107,16 +107,18 @@ const findPatrolHours = (hours, nrOfTents, nr) => {
  */
 
 const findBestAvailableSoldiers = (soldiers, time, drivers) => {
+    let available2 = [];
     let available = [];
 
     for (var i=0;i<soldiers.length;i++){
 
         if (drivers){
-            available = withDrivers(i, soldiers, available);
+            available = withoutDrivers(i, soldiers, available2);
         }
         else {
-            available = withoutDrivers(i, soldiers, available);
-        }        
+            available = withoutDrivers(i, soldiers, available2);
+        }
+              
     }
 
     let sorted = available.sort(function (a, b) {
@@ -137,10 +139,43 @@ const withDrivers = (i, soldiers, available) => {
     else {
         available.push(soldiers[i]);
     };
+    return available;
 };
 
 const withoutDrivers = (i, soldiers, available) => {
     if (soldiers[i].driver != 1) {
         available.push(soldiers[i]);
+    };
+    return available;
+};
+
+const assignHours = (patrolHours, hours, tent, schedule, nr) => {
+    let start = 0;
+    let stop = hours;
+    let stoveTrue = true;
+    
+    if (patrolHours != null) {
+        start = patrolHours[0];
+        stop = patrolHours[1]+1;
+        stoveTrue = false;
+        
+    }
+
+    for (var i=start; i<stop; i++){
+        
+        let condition = (hours-i > 6 || i >= 6);
+        let soldiers = findBestAvailableSoldiers(tent, i, condition);
+
+        if (stoveTrue) {
+            tent[tent.indexOf(soldiers[0])].hours++;
+            schedule[nr].hours[i].soldiers.stove = soldiers[0];
+        }
+        else {
+            tent[tent.indexOf(soldiers[0])].hours++;
+            tent[tent.indexOf(soldiers[1])].hours++;
+    
+            schedule[nr].hours[i].soldiers.patrol1 = soldiers[0];
+            schedule[nr].hours[i].soldiers.patrol2 = soldiers[1];
+        };
     };
 };
