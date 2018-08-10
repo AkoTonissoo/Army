@@ -58,3 +58,43 @@ const createEmptySchedule = (hours, nrOfTents) => {
     };
     return schedule;
 };
+
+/**
+ * Finds shift length. Should be useful to make sleep times longer
+ */
+
+const findShiftLength = (span, soldiers, nrOfTents) => {
+    let totalHours = span.hours*(1+1/nrOfTents);
+    let shiftLength = Math.ceil(totalHours/soldiers.length);
+    return shiftLength;
+};
+
+/**
+ * Finds hours when different tents will be on patrol
+ * returns Array of all the patrol times.
+ */
+
+const findPatrolHours = (hours, nrOfTents, nr) => {
+
+    let hoursPerTent = Math.ceil(hours/nrOfTents);
+    let hoursArray = [];
+
+    for(var i = 0; i<nrOfTents; i++){
+
+        if (i==0){
+            hoursArray.push([0,hoursPerTent-1])
+        }
+        else {
+            let startHour = hoursArray[i-1][1]+1;
+            let endHour = startHour-1+hoursPerTent;
+
+            if (endHour > hours-1) {
+                hoursArray.push([startHour, hours-1]);
+            }
+            else {
+                hoursArray.push([startHour, endHour]);
+            }
+        }
+    }
+    return hoursArray;
+};
