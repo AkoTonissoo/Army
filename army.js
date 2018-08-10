@@ -30,12 +30,18 @@ const createTents = (data) => {
             if (a < nrOfDrivers){
                 tentArray[i].push({name: 'Soldier'+a+'_'+i, driver: 1, hours: 0, lastShift: 0, ill: 0});
             }
-            if (a > nrOfDrivers && a < nrOfIll+nrOfDrivers) {
-                tentArray[i].push({name: 'Soldier'+a+'_'+i, driver: 0, hours: 0, lastShift: 0, ill: 1});
-            }
             else {
                 tentArray[i].push({name: 'Soldier'+a+'_'+i, driver: 0, hours: 0, lastShift: 0, ill: 0});
             }           
+        }
+        for (var e=nrOfSoldiers; e>0; e--){
+            var o = 0;
+            if (e>nrOfSoldiers-nrOfIll+1){
+                var nr = nrOfSoldiers+o
+                tentArray[i].push({name: 'Soldier'+nr+'_'+i, driver: 0, hours: 0, lastShift: 0, ill: 1});
+                
+            }
+            
         }
     }
     console.log(tentArray);
@@ -193,7 +199,9 @@ const assignHours = (patrolHours, hours, tent, schedule, nr) => {
         let condition = (hours-i > 6 || i >= 6);
         let soldiers = findBestAvailableSoldiers(tent, i, condition, false);
 
-        if (stoveTrue) {//todo check et keegi ees poleks seal juba
+        if (stoveTrue && !schedule[nr].hours[i].soldiers.stove.name) {//todo check et keegi ees poleks seal juba
+
+            console.log(!schedule[nr].hours[i].soldiers.stove.name)
             let soldier1inPatrol = schedule[nr].hours[i].soldiers.patrol1.name;
             let soldier2inPatrol = schedule[nr].hours[i].soldiers.patrol2.name;
 
@@ -223,9 +231,13 @@ const assignHours = (patrolHours, hours, tent, schedule, nr) => {
         else {
 
             if (soldiers[0].ill == 1){
+                schedule[nr].hours[i].soldiers.stove = soldiers[0];
+                tent[tent.indexOf(soldiers[0])].hours++;
                 soldiers = findBestAvailableSoldiers(tent, i, false, true);
             }
             if (soldiers[1].ill == 1){
+                schedule[nr].hours[i].soldiers.stove = soldiers[1];
+                tent[tent.indexOf(soldiers[1])].hours++;
                 soldiers = findBestAvailableSoldiers(tent, i, false, true);
             }
 
@@ -281,16 +293,16 @@ const prettyConsoleUI = (schedule) => {
         console.log('Tent no. '+(schedule[i].tent+1));
         for (var a=0; a<schedule[i].hours.length; a++){
             console.log('Hours '+schedule[i].hours[a].hour+' - '+(schedule[i].hours[a].hour+1));
-            let stove = 'Stove: ' + schedule[i].hours[a].soldiers.stove.name// + ' - ' + schedule[i].hours[a].soldiers.stove.hours
+            let stove = 'Stove: ' + schedule[i].hours[a].soldiers.stove.name + ' - ' + schedule[i].hours[a].soldiers.stove.hours
             patrol1 = ''
             let patrol2 = ''
 
             if (schedule[i].hours[a].soldiers.patrol1.name) {
-                patrol1 = 'First patrol: ' + schedule[i].hours[a].soldiers.patrol1.name// + ' - ' + schedule[i].hours[a].soldiers.patrol1.hours
+                patrol1 = 'First patrol: ' + schedule[i].hours[a].soldiers.patrol1.name + ' - ' + schedule[i].hours[a].soldiers.patrol1.hours
             }
 
             if (schedule[i].hours[a].soldiers.patrol2.name) {
-                patrol2 = 'Second patrol: ' + schedule[i].hours[a].soldiers.patrol2.name// + ' - ' + schedule[i].hours[a].soldiers.patrol2.hours
+                patrol2 = 'Second patrol: ' + schedule[i].hours[a].soldiers.patrol2.name + ' - ' + schedule[i].hours[a].soldiers.patrol2.hours
                 console.log(stove + ' - ' + patrol1 + ' - ' + patrol2);
             }
             else {
